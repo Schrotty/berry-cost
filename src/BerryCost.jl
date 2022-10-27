@@ -1,16 +1,23 @@
-module BerryCost
-    using StatsPlots
-    using Distributions
+using StatsPlots
+using Distributions
 
-    greet() = print("Hello World!")
-    function plottler()
-        p = plot(Normal(3, 5), lw = 3)
-        plot!(p, Normal(1, 6), lw = 4)
+function plottler()
+    theme(:dark)
 
-        display(p)
-    end
-end # module BerryCost
+    threshold = 5
 
-using .BerryCost
-theme(:dark)
-BerryCost.plottler()
+    xh = Normal(4.2, 5)
+    xg = Normal(7, 4)
+
+    ph = plot(xh, label = "Harmlos", color = "green")
+    pg = plot(xg, label = "Gefährlich", color = "red")
+
+    plot(ph, pg)
+    title!("Werteverteilung")
+    xlabel!("Wert")
+    ylabel!("Wahrscheinlichkeit bzw. Dichte")
+
+    println(pdf.(xh, [5]))
+end
+
+plottler()
