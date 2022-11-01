@@ -1,32 +1,45 @@
+using QuadGK
 using StatsPlots
 using Distributions
 
-function getpositives(dh, dd, t)::Tuple{Float64, Float64}
-    fp = 1 - cdf.(dh, t)
-    tp = 1 - cdf.(dd, t)
-    return (fp, tp)
+function getpositives(xh, xd, t)
+    fp = ccdf.(xh, t) # false positive - situation is not dangerous
+    tp = ccdf.(xd, t) # true positive - situation is dangerous
+    return (fp = fp, tp = tp, t = t)
+end
+
+function getprices(xh, xd, t)
+    return (ih = cdf.(xh, t)*2.0, id = cdf.(xd, t)*2.3, t = t)
 end
 
 # distributions
-dh = Normal(4.2, 5)
-dd = Normal(7, 4)
+xh = Normal(4.2, 5)
+xd = Normal(7, 4)
 
-positives = []
-for t in -20:20
-    push!(positives, getpositives(dh, dd, t))
-end
+# extrema
+min = -20
+max = 20
+
+prices = [getprices(xh, xd, x) for x in min:.01:max]
+
+# replace?
+t = [(diff = x.ih - x.id, t = x.t) for x in prices if x.ih - x.id == maximum([p.ih - p.id for p in prices])][1]
+
+positives = [getpositives(xh, xd, t) for t in min:1:max]
 
 # plots
 theme(:dark)
 
-dplt = plot(dh, label = "Harmless", color = "green")
-plot!(dplt, dd, label = "Dangerous", color = "red")
+dplt = plot(xh, label = "Harmless", color = "green")
+plot!(dplt, xd, label = "Dangerous", color = "red")
 
 title!("Distributions")
 xlabel!("Value")
 ylabel!("Density")
+vline!([t.t], label = "Threshold", color = "blue", line = (1, :dash), annotation = (t.t, 0.01, t.t))
 
-roc = plot(collect(zip(positives)), legend = false)
+roc = plot([(p.fp, p.tp) for p in positives], legend = false)
+title!("ROC")
 xlabel!("false positive")
 ylabel!("true positive")
 
