@@ -46,7 +46,7 @@ for x::Vector{Float64} in agents
     local tp = [p for p::Float64 in x if p > t.t]
     local n = length(x)
 
-    if !isempty(tp) && tp[1] > n * q
+    if length(tp) > n * q
         push!(tpg, (p = 1, n = n))
     else
         push!(fpg, (p = 0, n = n))
@@ -64,11 +64,11 @@ xlabel!("Value")
 ylabel!("Density")
 vline!([t.t], label = "Threshold", color = "blue", line = (1, :dash), annotation = (t.t, 0.01, t.t))
 
-mixplt = scatter([(p.n, p.p) for p in tpg], seriestype = :scatter, legend = true)
+mixplt = scatter([(p.n, p.p) for p in tpg], seriestype = :scatter, label = "True positive", legend = true)
 #ylims!(0.0, .1)
 #xlims!(0, 100)
 #hline!([q], label = "Quorum", color = "blue", line = (1, :dash))
-plot!(mixplt, [(p.n, p.p) for p in fpg], seriestype = :scatter)
+plot!(mixplt, [(p.n, p.p) for p in fpg], seriestype = :scatter, label = "False positive")
 
 mplot = scatter()
 
